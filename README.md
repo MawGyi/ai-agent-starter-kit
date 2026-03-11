@@ -215,6 +215,24 @@ Read source files → Analyse structure → Generate boilerplate → Compile rep
 **Custom tools:** `analyseCode`, `generateBoilerplate`
 **Demonstrates:** File I/O, static analysis, code generation
 
+## Demo
+
+Example command:
+
+```bash
+npx ts-node cli/run-agent.ts examples/chat-agent.ts
+```
+
+---
+
+## Integrations
+
+The toolkit can seamlessly integrate with any LLM provider, including:
+
+- OpenAI APIs
+- Anthropic Claude
+- Local LLM models
+
 ---
 
 ## 🏗️ Building Custom Agents
