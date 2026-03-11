@@ -1,0 +1,40 @@
+{
+  "name": "ai-agent-starter-kit",
+  "version": "1.0.0",
+  "description": "A developer-friendly toolkit for building AI agents with memory, tool execution, and automation workflows.",
+  "type": "module",
+  "main": "dist/agent-core/index.js",
+  "types": "dist/agent-core/index.d.ts",
+  "bin": {
+    "ai-agent": "cli/run-agent.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch cli/run-agent.ts",
+    "typecheck": "tsc --noEmit",
+    "run-agent": "tsx cli/run-agent.ts"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "llm",
+    "toolkit",
+    "automation",
+    "memory",
+    "tools",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "tsx": "^4.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.0",
+    "typescript": "^5.5.0"
+  }
+}
