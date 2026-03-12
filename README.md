@@ -47,7 +47,7 @@ Watch the AI Agent Starter Kit in action! In the terminal session below, our **S
 
 <div align="center">
   <a href="https://asciinema.org/" target="_blank">
-    <img src="https://raw.githubusercontent.com/MawGyi/ai-agent-starter-kit/main/docs/assets/demo.gif" alt="AI Agent Terminal Execution Demo" width="800" onerror="this.src='https://via.placeholder.com/800x450.png?text=Terminal+Demo+GIF/Video+Placeholder'"/>
+    <img src="https://raw.githubusercontent.com/MawGyi/ai-agent-starter-kit/main/docs/demo.gif" alt="AI Agent Terminal Execution Demo" width="800" onerror="this.src='https://via.placeholder.com/800x450.png?text=Terminal+Demo+GIF/Video+Placeholder'"/>
   </a>
 </div>
 
