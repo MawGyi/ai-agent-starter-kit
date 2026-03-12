@@ -225,13 +225,15 @@ npx ts-node cli/run-agent.ts examples/chat-agent.ts
 
 ---
 
-## Integrations
+## Claude Integration Example
 
-The toolkit can seamlessly integrate with any LLM provider, including:
+This toolkit can integrate with modern AI models including Anthropic Claude, OpenAI APIs, and local LLM systems.
 
-- OpenAI APIs
-- Anthropic Claude
-- Local LLM models
+Example CLI usage:
+
+```bash
+npx ts-node cli/run-agent.ts examples/claude-agent.ts
+```
 
 ---
 
