@@ -8,6 +8,8 @@ A production-ready TypeScript framework for creating AI agents with **persistent
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-≥18-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![CI](https://img.shields.io/github/actions/workflow/status/MawGyi/ai-agent-starter-kit/ci.yml?label=CI&logo=github)](https://github.com/MawGyi/ai-agent-starter-kit/actions)
+[![Tests](https://img.shields.io/badge/tests-40%20passed-brightgreen?logo=vitest)](tests/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Stars](https://img.shields.io/github/stars/MawGyi/ai-agent-starter-kit?style=social)](https://github.com/MawGyi/ai-agent-starter-kit)
@@ -39,6 +41,41 @@ A production-ready TypeScript framework for creating AI agents with **persistent
 
 ---
 
+## 🎥 Visual Demo
+
+Watch the AI Agent Starter Kit in action! In the terminal session below, our **Streaming Mode** provides lightning-fast execution feedback while the robust **Tool Execution loop** natively bridges LLM logic with local systems. Notice how the agent automatically invokes `httpFetch` to retrieve live data, pipelines the response into `extractKeywords`, and distills it via `summarize` without any intermediate human intervention.
+
+<div align="center">
+  <a href="https://asciinema.org/" target="_blank">
+    <img src="https://raw.githubusercontent.com/MawGyi/ai-agent-starter-kit/main/docs/assets/demo.gif" alt="AI Agent Terminal Execution Demo" width="800" onerror="this.src='https://via.placeholder.com/800x450.png?text=Terminal+Demo+GIF/Video+Placeholder'"/>
+  </a>
+</div>
+
+**Live Execution Example:**
+
+```bash
+$ npx tsx cli/run-agent.ts run examples/research-agent.ts --task "Research TypeScript" --verbose
+
+┌──────────────────────────────────────────┐
+│       🤖  AI Agent Starter Kit  🤖       │
+│         CLI Runner v1.0.0                │
+└──────────────────────────────────────────┘
+
+✓ Agent loaded: research-agent
+▶ Task: Research TypeScript
+
+  ℹ Agent "research-agent" starting task.
+  ⚡ Calling tool: httpFetch
+  ← Tool "httpFetch" result: success
+  ⚡ Calling tool: extractKeywords
+  ← Tool "extractKeywords" result: success
+  ⚡ Calling tool: summarize
+  ← Tool "summarize" result: success
+  ✓ Task completed successfully.
+```
+
+---
+
 ## 🤔 Why AI Agent Starter Kit?
 
 Most AI agent frameworks are **bloated**, **opinionated**, or **locked to a single LLM provider**. This toolkit takes a different approach:
@@ -47,9 +84,11 @@ Most AI agent frameworks are **bloated**, **opinionated**, or **locked to a sing
 |---------|-------------|
 | 🏗️ Complex setup with dozens of dependencies | **3 core files**, zero bloat — start building in seconds |
 | 🔒 Locked to OpenAI / Anthropic / etc. | **LLM-agnostic** — plug in ANY provider (or none at all) |
-| 🧠 Agents forget everything between runs | **Persistent JSON memory** with namespace isolation |
+| 🧠 Agents forget everything between runs | **Persistent JSON memory** + **Vector Memory** with cosine-similarity search |
 | 🔧 Hard to give agents real capabilities | **Tool framework** with validation, built-in tools, and easy custom tools |
-| 📦 "Hello world" agents that can't do real work | **3 production-style example agents** with multi-step workflows |
+| 🤖 No real LLM integration out of the box | **Native Claude SDK example** with full tool-use loop |
+| ❓ No tests, no CI, "works on my machine" | **40+ Vitest tests**, GitHub Actions CI on Node 18/20/22 |
+| 📦 "Hello world" agents that can't do real work | **5 production-style example agents** including multi-agent orchestration |
 
 ---
 
@@ -59,14 +98,16 @@ Most AI agent frameworks are **bloated**, **opinionated**, or **locked to a sing
 <tr>
 <td width="50%">
 
-### 🧠 Persistent Memory
+### 🧠 Persistent Memory + Vector Search
 ```typescript
-// Agents remember across sessions
+// Key-value memory persists across sessions
 agent.memory.set("user_preference", "dark_mode");
 agent.memory.get("user_preference"); // "dark_mode"
 
-// Namespace isolation per agent
-// Each agent gets its own memory file
+// Semantic vector memory with cosine similarity
+const vm = new VectorMemory();
+await vm.saveMemory("TypeScript is great");
+const results = await vm.searchMemory("JavaScript");
 ```
 
 </td>
@@ -91,28 +132,30 @@ const tool: Tool = {
 <tr>
 <td width="50%">
 
-### ⚡ CLI Runner
+### ⚡ CLI Runner + Interactive Chat
 ```bash
 # Run any agent from the terminal
 npx tsx cli/run-agent.ts run my-agent.ts \
   --task "Analyse the codebase" \
   --verbose
 
-# List available tools
-npx tsx cli/run-agent.ts list-tools
+# Interactive mode — multi-turn chat
+npx tsx cli/run-agent.ts run my-agent.ts -i
 ```
 
 </td>
 <td width="50%">
 
-### 🎯 Event Hooks
+### 🤖 Native Claude Integration
 ```typescript
-agent.on({
-  onTaskStart:  (task) => log("Starting..."),
-  onToolCall:   (name) => log(`Using ${name}`),
-  onToolResult: (name, r) => log(r.success),
-  onTaskComplete: (result) => log("Done!"),
+import { ClaudeAgent } from "./examples/claude-agent.js";
+
+const agent = new ClaudeAgent({
+  name: "claude-assistant",
+  systemPrompt: "You are a helpful agent.",
 });
+// Full tool-use loop handled automatically
+const result = await agent.run("What date is it?");
 ```
 
 </td>
@@ -127,6 +170,7 @@ agent.on({
 | ✍️ `writeFile` | Write content to files | Report generation, code output |
 | 🌐 `httpFetch` | HTTP/HTTPS requests | API calls, web scraping |
 | 💻 `shellExec` | Execute shell commands | Build scripts, system tasks |
+| 🧠 `VectorMemory` | Embedding-based semantic search | Long-term agent recall |
 
 ---
 
@@ -146,16 +190,20 @@ npm install
 ### Run Your First Agent
 
 ```bash
+# Copy the example env file
+cp .env.example .env
+# Edit .env and add your ANTHROPIC_API_KEY (only needed for the Claude example)
+
 # Run the research agent
 npx tsx cli/run-agent.ts run examples/research-agent.ts \
   --task "Research TypeScript best practices" --verbose
 
-# Run the automation agent
-npx tsx cli/run-agent.ts run examples/automation-agent.ts --verbose
+# Run the Claude-powered agent (requires ANTHROPIC_API_KEY)
+npx tsx cli/run-agent.ts run examples/claude-agent.ts \
+  --task "What is TypeScript?" --verbose
 
-# Run the coding agent
-npx tsx cli/run-agent.ts run examples/coding-agent.ts \
-  --task "Analyse code quality" --verbose
+# Interactive multi-turn chat mode
+npx tsx cli/run-agent.ts run examples/research-agent.ts -i
 ```
 
 ### Create Your First Agent (5 Lines)
@@ -215,25 +263,28 @@ Read source files → Analyse structure → Generate boilerplate → Compile rep
 **Custom tools:** `analyseCode`, `generateBoilerplate`
 **Demonstrates:** File I/O, static analysis, code generation
 
-## Demo
+---
 
-Example command:
+### 🤖 Claude Agent (Anthropic SDK)
+> Real LLM integration with full tool-use loop.
 
-```bash
-npx ts-node cli/run-agent.ts examples/chat-agent.ts
 ```
+User prompt → Claude reasons → tool_use request → Agent executes → tool_result → Claude answers
+```
+
+**Requires:** `ANTHROPIC_API_KEY` environment variable
+**Demonstrates:** LLM subclassing, Anthropic SDK, dynamic tool schema mapping, multi-turn tool-use
 
 ---
 
-## Claude Integration Example
+### 🏗️ Multi-Agent Orchestrator
+> A manager agent delegates sub-tasks to specialist agents.
 
-This toolkit can integrate with modern AI models including Anthropic Claude, OpenAI APIs, and local LLM systems.
-
-Example CLI usage:
-
-```bash
-npx ts-node cli/run-agent.ts examples/claude-agent.ts
 ```
+Complex task → Manager splits work → Research Agent runs → Coding Agent runs → Combined result
+```
+
+**Demonstrates:** Agent-to-agent communication, tool-wrapped agents, task decomposition
 
 ---
 
@@ -393,15 +444,27 @@ ai-agent-starter-kit/
 │   ├── agent.ts            # Agent class — lifecycle, hooks, execution
 │   ├── memory.ts           # Persistent JSON memory with namespaces
 │   ├── tools.ts            # Tool registry + 4 built-in tools
+│   ├── vectorMemory.ts     # Embedding-based vector memory with cosine similarity
+│   ├── config.ts           # Environment variable validation
 │   └── index.ts            # Public API barrel exports
 ├── cli/
-│   └── run-agent.ts        # CLI entry point (run / list-tools)
+│   └── run-agent.ts        # CLI entry point (run / list-tools / interactive mode)
 ├── examples/
 │   ├── research-agent.ts   # 🔬 Multi-step research workflow
 │   ├── automation-agent.ts # ⚙️  Sequential task automation
-│   └── coding-agent.ts     # 💻 Code analysis & generation
+│   ├── coding-agent.ts     # 💻 Code analysis & generation
+│   ├── claude-agent.ts     # 🤖 Native Anthropic Claude integration
+│   └── multi-agent-orchestrator.ts # 🏗️ Multi-agent task delegation
+├── tests/                  # Vitest unit tests (40+ tests)
+│   ├── agent.test.ts
+│   ├── memory.test.ts
+│   └── tools.test.ts
+├── .github/workflows/ci.yml # GitHub Actions CI (Node 18/20/22)
+├── .env.example            # Environment variable template
 ├── docs/
-│   └── architecture.md     # Full system architecture docs
+│   ├── architecture.md     # Full system architecture docs
+│   └── integrations.md     # LLM integration guide
+├── vitest.config.ts
 ├── package.json
 ├── tsconfig.json
 ├── LICENSE                 # MIT
@@ -417,6 +480,12 @@ ai-agent-starter-kit/
 # Type-check (zero errors expected)
 npm run typecheck
 
+# Run the full test suite (40+ tests)
+npm run test
+
+# Run tests in watch mode during development
+npm run test:watch
+
 # Build to dist/
 npm run build
 
@@ -428,13 +497,15 @@ npm run run-agent -- run examples/research-agent.ts --verbose
 
 ## 🗺️ Roadmap
 
+- [x] **Test suite** — 40+ Vitest unit tests with CI running on Node 18/20/22
+- [x] **LLM provider adapters** — Native Anthropic Claude SDK with full tool-use loop
+- [x] **Agent-to-agent communication** — Multi-agent orchestration example
+- [x] **Vector memory** — Cosine-similarity semantic search with pluggable embeddings
+- [x] **Interactive CLI** — Multi-turn chat mode with `--interactive` flag
 - [ ] **Plugin system** — Install tools from npm packages
 - [ ] **Streaming execution** — Real-time tool output streaming
-- [ ] **Agent-to-agent communication** — Multi-agent orchestration
 - [ ] **Web UI dashboard** — Visual agent monitoring and management
 - [ ] **SQLite / Redis memory backends** — Production-grade persistence
-- [ ] **LLM provider adapters** — First-class OpenAI, Anthropic, Ollama support
-- [ ] **Test suite** — Comprehensive unit and integration tests
 - [ ] **Agent templates** — `npx create-ai-agent` scaffolding CLI
 
 ---
